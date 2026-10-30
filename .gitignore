@@ -3,3 +3,6 @@ CommonWallpaper.app/
 *.bak*
 *.log
 .DS_Store
+bin/
+obj/
+__pycache__/

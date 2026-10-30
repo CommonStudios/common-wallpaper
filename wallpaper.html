@@ -1,12 +1,8 @@
-import Cocoa
-import WebKit
-
-let app = NSApplication.shared
-app.setActivationPolicy(.accessory)
-// The cloud-sea piece from ascii.rest, drawn in one WebGL pass: each frame uploads the 200x100 grid of
-// (dot size, palette colour) as a texture, and the shader stamps the dot glyphs and fades the edges.
-let html = #"""
-<!doctype html><style>html,body{margin:0;width:100%;height:100%;background:#111312;overflow:hidden}canvas{position:absolute;width:min(50vw,100vh);left:50%;top:50%;transform:translate(-50%,-50%)}</style><canvas></canvas>
+<!doctype html>
+<!-- The cloud-sea piece from ascii.rest, drawn in one WebGL pass: each frame uploads the 200x100 grid of
+     (dot size, palette colour) as a texture, and the shader stamps the dot glyphs and fades the edges.
+     Every platform's app shows this page full screen behind the desktop icons. -->
+<style>html,body{margin:0;width:100%;height:100%;background:#111312;overflow:hidden}canvas{position:absolute;width:min(50vw,100vh);left:50%;top:50%;transform:translate(-50%,-50%)}</style><canvas></canvas>
 <script type="module">
 import cloudSea, { meta } from "https://ascii.rest/pieces/cloud-sea.js";
 const FPS = 15, BG = [0x11, 0x13, 0x12].map((v) => v / 255);
@@ -107,29 +103,3 @@ const dpr = () => matchMedia(`(resolution: ${devicePixelRatio}dppx)`).addEventLi
 dpr();
 document.addEventListener("visibilitychange", run);
 </script>
-"""#
-// One wallpaper window per display, refitted whenever displays are added, removed, or change resolution.
-var windows: [NSWindow] = []
-func fit() {
-    let screens = NSScreen.screens
-    while windows.count > screens.count { windows.removeLast().close() }
-    while windows.count < screens.count {
-        let window = NSWindow(contentRect: .zero, styleMask: .borderless, backing: .buffered, defer: false)
-        window.isReleasedWhenClosed = false
-        window.level = NSWindow.Level(rawValue: Int(CGWindowLevelForKey(.desktopWindow)) + 1)
-        window.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
-        window.ignoresMouseEvents = true
-        let web = WKWebView(frame: .zero)
-        web.autoresizingMask = [.width, .height]
-        window.contentView = web
-        web.loadHTMLString(html, baseURL: URL(string: "https://commonstudios.dk/"))
-        windows.append(window)
-    }
-    for (window, screen) in zip(windows, screens) {
-        window.setFrame(screen.frame, display: true)
-        window.orderFrontRegardless()
-    }
-}
-fit()
-NotificationCenter.default.addObserver(forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main) { _ in fit() }
-app.run()

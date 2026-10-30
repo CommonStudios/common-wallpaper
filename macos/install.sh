@@ -10,7 +10,9 @@ launchctl bootout gui/$(id -u)/local.common.wallpaper 2>/dev/null || true
 pkill -x CommonWallpaper || true
 rm -rf $app
 mkdir -p $app/Contents/MacOS ~/Library/LaunchAgents
+mkdir -p $app/Contents/Resources
 cp Info.plist $app/Contents/
+cp ../wallpaper.html $app/Contents/Resources/
 mv CommonWallpaper $app/Contents/MacOS/
 
 cat > $agent <<PLIST
