@@ -1,0 +1,5 @@
+CommonWallpaper
+CommonWallpaper.app/
+*.bak*
+*.log
+.DS_Store
